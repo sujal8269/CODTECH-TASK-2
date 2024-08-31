@@ -1,0 +1,318 @@
+#include <iostream>
+#include <list>
+#include <vector>
+using namespace std;
+// Node structure
+struct Node {
+    int data;
+    Node* next;
+    Node(int val) : data(val), next(nullptr) {}
+};
+
+// Linked List class
+class LinkedList {
+private:
+    Node* head;
+
+public:
+    LinkedList() : head(nullptr) {}
+
+    // Insertion at the end
+    void insert(int value) {
+        Node* newNode = new Node(value);
+        if (head == nullptr) {
+            head = newNode;
+        } else {
+            Node* temp = head;
+            while (temp->next != nullptr) {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+    }
+
+    // Deletion by value
+    void remove(int value) {
+        if (head == nullptr) return;
+        if (head->data == value) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+            return;
+        }
+        Node* temp = head;
+        while (temp->next != nullptr && temp->next->data != value) {
+            temp = temp->next;
+        }
+        if (temp->next == nullptr) return;
+        Node* toDelete = temp->next;
+        temp->next = temp->next->next;
+        delete toDelete;
+    }
+
+    // Searching
+    bool search(int value) {
+        Node* temp = head;
+        while (temp != nullptr) {
+            if (temp->data == value) return true;
+            temp = temp->next;
+        }
+        return false;
+    }
+
+    // Traversal
+    void traverse() {
+        Node* temp = head;
+        while (temp != nullptr) {
+            cout << temp->data << " -> ";
+            temp = temp->next;
+        }
+        cout << "NULL\n";
+    }
+
+    // Destructor to free memory
+    ~LinkedList() {
+        Node* temp;
+        while (head != nullptr) {
+            temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+
+//BST implementation
+
+// Node structure
+struct BSTNode {
+    int data;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int val) : data(val), left(nullptr), right(nullptr) {}
+};
+
+// Binary Search Tree class
+class BST {
+private:
+    BSTNode* root;
+
+    // Insertion helper
+    BSTNode* insert(BSTNode* node, int value) {
+        if (node == nullptr) return new BSTNode(value);
+        if (value < node->data) {
+            node->left = insert(node->left, value);
+        } else {
+            node->right = insert(node->right, value);
+        }
+        return node;
+    }
+
+    // Inorder traversal helper
+    void inorder(BSTNode* node) {
+        if (node == nullptr) return;
+        inorder(node->left);
+        std::cout << node->data << " ";
+        inorder(node->right);
+    }
+
+    // Searching helper
+    bool search(BSTNode* node, int value) {
+        if (node == nullptr) return false;
+        if (node->data == value) return true;
+        if (value < node->data) return search(node->left, value);
+        return search(node->right, value);
+    }
+
+    // Deletion helper
+    BSTNode* remove(BSTNode* node, int value) {
+        if (node == nullptr) return nullptr;
+        if (value < node->data) {
+            node->left = remove(node->left, value);
+        } else if (value > node->data) {
+            node->right = remove(node->right, value);
+        } else {
+            if (node->left == nullptr) {
+                BSTNode* temp = node->right;
+                delete node;
+                return temp;
+            } else if (node->right == nullptr) {
+                BSTNode* temp = node->left;
+                delete node;
+                return temp;
+            } else {
+                BSTNode* temp = findMin(node->right);
+                node->data = temp->data;
+                node->right = remove(node->right, temp->data);
+            }
+        }
+        return node;
+    }
+
+    // Find minimum node in a subtree
+    BSTNode* findMin(BSTNode* node) {
+        while (node->left != nullptr) {
+            node = node->left;
+        }
+        return node;
+    }
+
+public:
+    BST() : root(nullptr) {}
+
+    // Insertion
+    void insert(int value) {
+        root = insert(root, value);
+    }
+
+    // Deletion
+    void remove(int value) {
+        root = remove(root, value);
+    }
+
+    // Searching
+    bool search(int value) {
+        return search(root, value);
+    }
+
+    // Inorder Traversal
+    void inorder() {
+        inorder(root);
+        cout << "\n";
+    }
+
+    // Destructor to free memory
+    ~BST() {
+        destroyTree(root);
+    }
+
+    // Helper function to destroy tree
+    void destroyTree(BSTNode* node) {
+        if (node != nullptr) {
+            destroyTree(node->left);
+            destroyTree(node->right);
+            delete node;
+        }
+    }
+};
+
+//graph implementation
+
+class Graph {
+private:
+    int vertices; // Number of vertices
+    std::vector<std::list<int>> adjList; // Adjacency list
+
+public:
+    Graph(int v) : vertices(v), adjList(v) {}
+
+    // Add edge
+    void addEdge(int src, int dest) {
+        adjList[src].push_back(dest);
+        adjList[dest].push_back(src); // For undirected graph
+    }
+
+    // DFS Traversal
+    void DFS(int v, std::vector<bool>& visited) {
+        visited[v] = true;
+        std::cout << v << " ";
+        for (int adj : adjList[v]) {
+            if (!visited[adj]) {
+                DFS(adj, visited);
+            }
+        }
+    }
+
+    // BFS Traversal
+    void BFS(int start) {
+        std::vector<bool> visited(vertices, false);
+        std::list<int> queue;
+        visited[start] = true;
+        queue.push_back(start);
+        while (!queue.empty()) {
+            int v = queue.front();
+            std::cout << v << " ";
+            queue.pop_front();
+            for (int adj : adjList[v]) {
+                if (!visited[adj]) {
+                    visited[adj] = true;
+                    queue.push_back(adj);
+                }
+            }
+        }
+    }
+
+    // Search using DFS
+    bool searchDFS(int start, int target) {
+        std::vector<bool> visited(vertices, false);
+        return DFSUtil(start, target, visited);
+    }
+
+    // Utility for DFS search
+    bool DFSUtil(int v, int target, std::vector<bool>& visited) {
+        visited[v] = true;
+        if (v == target) return true;
+        for (int adj : adjList[v]) {
+            if (!visited[adj] && DFSUtil(adj, target, visited)) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+int main() {
+    //linked list functions
+    LinkedList list;
+    list.insert(10);
+    list.insert(20);
+    list.insert(30);
+    list.traverse();  // Output: 10 -> 20 -> 30 -> NULL
+
+    list.remove(20);
+    list.traverse();  // Output: 10 -> 30 -> NULL
+
+    cout << "Search 10: " << (list.search(10) ? "Found" : "Not Found") << "\n";  // Output: Found
+    cout << "Search 20: " << (list.search(20) ? "Found" : "Not Found") << "\n";  // Output: Not Found
+
+    //BSt functions
+    BST bst;
+    bst.insert(50);
+    bst.insert(30);
+    bst.insert(70);
+    bst.insert(20);
+    bst.insert(40);
+    bst.insert(60);
+    bst.insert(80);
+
+    bst.inorder();  // Output: 20 30 40 50 60 70 80 
+
+    bst.remove(50);
+    bst.inorder();  // Output: 20 30 40 60 70 80 
+
+    cout << "Search 30: " << (bst.search(30) ? "Found" : "Not Found") << "\n";  // Output: Found
+    cout << "Search 50: " << (bst.search(50) ? "Found" : "Not Found") << "\n";  // Output: Not Found
+
+    //graph implementation 
+
+    Graph g(5);
+    g.addEdge(0, 1);
+    g.addEdge(0, 4);
+    g.addEdge(1, 2);
+    g.addEdge(1, 3);
+    g.addEdge(1, 4);
+    g.addEdge(2, 3);
+    g.addEdge(3, 4);
+
+    cout << "DFS traversal starting from vertex 0:\n";
+    vector<bool> visited(5, false);
+    g.DFS(0, visited);  // Output: 0 1 2 3 4 
+
+    std::cout << "\nBFS traversal starting from vertex 0:\n";
+    g.BFS(0);  // Output: 0 1 4 2 3 
+
+    cout << "\nSearch for vertex 3 using DFS starting from vertex 0: ";
+    cout<< (g.searchDFS(0, 3) ? "Found" : "Not Found") << "\n";  // Output: Found
+
+    return 0;
+}
